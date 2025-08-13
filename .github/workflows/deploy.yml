@@ -12,9 +12,7 @@ jobs:
         - uses: actions/checkout@v4
 
         - name: Imprimir en consola
-          run:
-            echo "Hello World, GITHUB ACTIONS"
-
+          run: echo "Hello World, GITHUB ACTIONS"
 
     test:
         needs: helloworld
