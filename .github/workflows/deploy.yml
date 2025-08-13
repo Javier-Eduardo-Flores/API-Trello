@@ -82,17 +82,16 @@ jobs:
 
             # Verify installation
             railway --version || railway version || echo "Railway CLI installed but version check failed"
-
         - name: Deploy to Railway
           env:
             RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
           run: |
             echo "starting deployment to Railway"
-            railway up --service "Trello-api" || \ 
+            railway up --service "Trello-api" || \
             railway up --service Trello-api || \
-            railway up --service web|| \
-            railway up --service api|| \
-            railway up --service app|| \
+            railway up --service web || \
+            railway up --service api || \
+            railway up --service app || \
             railway up --service Trello-api || \
             railway up --service Trello || \
             railway up --service backend || \
