@@ -12,7 +12,7 @@ jobs:
         steps:
         - uses: actions/checkout@v4
 
-        -name: Imprimir en consola
+        - name: Imprimir en consola
             run: 
                 echo "Hola, mundo!, GITHUB ACTIONS"
          
