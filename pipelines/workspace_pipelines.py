@@ -8,10 +8,15 @@ def get_lists_in_workspace_pipeline(workspace_id: str) -> list:
             }
         },
         {
+            "$addFields": {
+                "id_str": {"$toString": "$_id"} 
+            }
+        },
+        {
             "$lookup": {
                 "from": "lists",
-                "localField": "_id",
-                "foreignField": "id_workspace",
+                "localField": "id_str",       
+                "foreignField": "id_workspace",  
                 "as": "lists"
             }
         },

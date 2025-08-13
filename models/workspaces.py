@@ -4,7 +4,7 @@ from models.members import member
 import re
 
 class Workspace(BaseModel):
-    id: Optional[int] = Field(default=None, description="Workspace ID")
+    id: Optional[str] = Field(default=None, description="Workspace ID")
 
     name: str = Field(
         description="Workspace name",
@@ -20,13 +20,9 @@ class Workspace(BaseModel):
         examples=["This workspace is for the marketing team to collaborate on campaigns and strategies."]
     )
 
-    id_user: str = Field(
+    id_user: Optional[str] = Field(
+        default=None,
         description="ID of the user who owns the workspace",
-    )
-
-    members: Optional[List[member]] = Field(
-        default=[],
-        description="List of users who are members of this workspace"
     )
 
     @field_validator('name')

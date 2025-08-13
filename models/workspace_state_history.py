@@ -2,7 +2,7 @@ from  pydantic import BaseModel, Field, field_validator
 from typing import Optional
 import re
 
-class stateWorkspaceRecord(BaseModel):
+class workspaceStateHistory(BaseModel):
     id: Optional[int] = Field(default=None, description="State Workspace Record ID")
 
     id_workspace: str = Field(
@@ -15,7 +15,7 @@ class stateWorkspaceRecord(BaseModel):
         examples=["64b7f2e4a1c2b3d4e5f67890", "5f2d7c8e9a0b1c2d3e4f5678"]
     )
     
-    date: datetime = Field(
+    date: change_date = Field(
         description="Date when the state was recorded",
         examples=["2023-10-01T12:00:00Z", "2023-10-02T15:30:00Z"]
     )   

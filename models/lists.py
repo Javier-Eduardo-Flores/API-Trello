@@ -3,7 +3,7 @@ from typing import Optional
 import re
 
 class List(BaseModel):
-    id: Optional[int] = Field(default=None, description="List ID")
+    id: Optional[str] = Field(default=None, description="List ID")
 
     title: str = Field(
         description="List title",
@@ -13,12 +13,13 @@ class List(BaseModel):
     )
 
     description: Optional[str] = Field(
-        default=None,
+        default=str(""),
         description="Detailed description of the list",
         max_length=500,
         examples=["Tasks that need to be completed in this list."]
     )
-    id_workspace: str = Field(
+    id_workspace: Optional[str] = Field(
+        default=None,
         description="ID of the workspace to which this list belongs",
     )
 

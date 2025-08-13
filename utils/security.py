@@ -78,12 +78,16 @@ def validateuser(func):
             request.state.firstname = firstname
             request.state.lastname = lastname
             request.state.id = id
+            request.state.admin = payload.get("admin", False)
 
 
         except PyJWTError:
             raise HTTPException( status_code=401, detail="Invalid token or expired token"  )
 
-        return await func( *args, **kwargs )
+        result = func( *args, **kwargs )
+        if hasattr(result, '__await__'):
+            return await result
+        return result
     return wrapper
 
 
@@ -132,5 +136,8 @@ def validateadmin(func):
         except PyJWTError:
             raise HTTPException( status_code=401, detail="Invalid token or expired token"  )
 
-        return await func( *args, **kwargs )
+        result = func( *args, **kwargs )
+        if hasattr(result, '__await__'):
+            return await result
+        return result
     return wrapper

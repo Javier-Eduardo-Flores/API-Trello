@@ -1,38 +1,53 @@
 from bson import ObjectId
 
-def get_lists_with_tasks_pipeline(workspace_id: str) -> list:
+def get_lists_by_workspace_pipeline(workspace_id: str) -> list:
+    """
+    Pipeline para obtener todas las listas de un workspace específico
+    """
     return [
         {
             "$match": {
-                "id_workspace": ObjectId(workspace_id)
+                "id_workspace": workspace_id
             }
         },
         {
-            "$lookup": {
-                "from": "tasks",
-                "localField": "_id",
-                "foreignField": "id_list",
-                "as": "tasks"
+            "$addFields": {
+                "id": {"$toString": "$_id"}
             }
         },
         {
             "$project": {
-                "_id": {"$toString": "$_id"},
+                "_id": 0,
+                "id": 1,
                 "title": 1,
                 "description": 1,
-                "id_workspace": 1,
-                "tasks": {
-                    "$map": {
-                        "input": "$tasks",
-                        "as": "task",
-                        "in": {
-                            "id": {"$toString": "$$task._id"},
-                            "title": "$$task.title",
-                            "description": "$$task.description",
-                            "id_list": "$$task.id_list",
-                        }
-                    }
+                "id_workspace": 1
+            }
+        },
+        {
+            "$sort": {
+                "title": 1
+            }
+        }
+    ]
+
+def get_list_by_name_in_workspace_pipeline(workspace_id: str, title: str) -> list:
+    return [
+         {
+            "$match": {
+                "id_workspace": workspace_id,
+                "title": {
+                    "$regex": f"^{title}$",
+                    "$options": "i"  
                 }
+            }
+        },
+        {
+            "$project": {
+                "_id": { "$toString": "$_id" },
+                "title": { "$toLower": "$title" },
+                "description": { "$toLower": "$description" },
+                "workspace_id": { "$toString": "$workspace_id" }
             }
         }
     ]
@@ -41,7 +56,7 @@ def count_tasks_in_list_pipeline(list_id: str) -> list:
     return [
         {
             "$match": {
-                "id_list": ObjectId(list_id)
+                "id_list": list_id
             }
         },
         {

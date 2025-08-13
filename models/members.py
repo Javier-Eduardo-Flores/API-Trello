@@ -3,6 +3,7 @@ from typing import Optional
 import re
 
 class member(BaseModel):
+   id :Optional[str] = Field(default=None, description="Member ID")
    id_user:str = Field(default=None, description="Member ID")
 
    id_workspace: str = Field(

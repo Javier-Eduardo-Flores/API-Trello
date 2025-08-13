@@ -1,5 +1,6 @@
 from  pydantic import BaseModel, Field, field_validator
 from typing import Optional
+from datetime import datetime
 import re
 
 class Task(BaseModel):
@@ -12,17 +13,29 @@ class Task(BaseModel):
         examples=["Complete project report", "Prepare presentation for meeting"]
     )
 
-    id_list: str = Field(
+    id_list: Optional[str] = Field(
         default=None,
         description="ID of the list to which the task belongs"
     )
-    
+    """
+    creation_date: datetime = Field(
+        default=None,
+        description="Creation date of the task"
+    )
+
+    update_date: datetime = Field(
+        default=None,
+        description="Update date of the task"
+    )
+    """
+
     description: Optional[str] = Field(
         default=None,
         description="Detailed description of the task",
         max_length=500,
         examples=["Write a detailed report on the project progress and outcomes."]
     )
+
 
     
     @field_validator('title')
