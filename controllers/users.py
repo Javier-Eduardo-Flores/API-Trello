@@ -17,8 +17,6 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 load_dotenv()
-cred = credentials.Certificate("./secrets/trello_secrets.json")
-firebase_admin.initialize_app(cred)
 
 """
 Function to create a new user in Firebase and MongoDB (Funcion tomada del repositorio del maestro)
@@ -37,8 +35,7 @@ def initialize_firebase():
             cred = credentials.Certificate(firebase_creds)
             firebase_admin.initialize_app(cred)
             logger.info("Firebase initialized with environment variable credentials")
-        else:
-            
+        else:  
             cred = credentials.Certificate("secrets/trello-secrets.json")
             firebase_admin.initialize_app(cred)
             logger.info("Firebase initialized with JSON file")
