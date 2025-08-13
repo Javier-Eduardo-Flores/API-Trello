@@ -10,8 +10,17 @@ from models.login import Login
 from routes.workspaces import router as workspaces_router
 from routes.tasks import router as tasks_router
 from routes.lists import router as lists_router
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
+
+app-add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allows all origins, adjust as needed
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows all methods, adjust as needed
+    allow_headers=["*"],  # Allows all headers, adjust as needed
+)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
