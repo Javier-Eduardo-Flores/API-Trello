@@ -2,9 +2,11 @@ import os
 import logging
 import firebase_admin
 import requests
+import base64
+import json
 from fastapi import HTTPException
 from firebase_admin import credentials, auth as firebase_auth
-
+from dotenv import load_dotenv
 from models.users import User
 from models.login import Login
 
@@ -14,6 +16,7 @@ from utils.mongodb import get_collection
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+load_dotenv()
 cred = credentials.Certificate("./secrets/trello_secrets.json")
 firebase_admin.initialize_app(cred)
 
@@ -21,6 +24,31 @@ firebase_admin.initialize_app(cred)
 Function to create a new user in Firebase and MongoDB (Funcion tomada del repositorio del maestro)
 """
 
+def initialize_firebase():
+    if firebase_admin._apps:
+        return
+
+    try:
+        firebase_creds_base64 = os.getenv("FIREBASE_CREDENTIALS_BASE64")
+
+        if firebase_creds_base64:
+            firebase_creds_json = base64.b64decode(firebase_creds_base64).decode('utf-8')
+            firebase_creds = json.loads(firebase_creds_json)
+            cred = credentials.Certificate(firebase_creds)
+            firebase_admin.initialize_app(cred)
+            logger.info("Firebase initialized with environment variable credentials")
+        else:
+            
+            cred = credentials.Certificate("secrets/trello-secrets.json")
+            firebase_admin.initialize_app(cred)
+            logger.info("Firebase initialized with JSON file")
+
+    except Exception as e:
+        logger.error(f"Failed to initialize Firebase: {e}")
+        raise HTTPException(status_code=500, detail=f"Firebase configuration error: {str(e)}")
+
+
+initialize_firebase()
 
 async def create_user(user: User) -> User:
 

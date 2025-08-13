@@ -19,9 +19,41 @@ logger = logging.getLogger(__name__)
 app.include_router(workspaces_router)
 app.include_router(tasks_router)
 app.include_router(lists_router)
+
 @app.get("/")
 def read_root():
     return {"message": "Welcome to the Trello Clone API"}
+
+@app.get("/health")
+def health_check():
+    try:
+        return {
+            "status": "healthy",
+            "timestamp": "2025-08-15",
+            "service": "Trello Clone API",
+            "environment": "production"
+        }
+    except Exception as e:
+        return {
+            "status": "unhealthy",
+            "error": str(e)
+        }
+
+@app.get("/ready")
+def readiness_check():
+    try:
+        from utils.mongodb import get_collection
+        db_status = test_connection()
+
+        return {"status": "ready" if db_status else "not ready",
+                "database":"connected" if db_status else "not connected",
+                "service": "Trello Clone API"
+               }
+    except Exception as e:
+        return {"status": "not ready", "error": str(e)}
+
+
+
 
 @app.post("/users")
 async def register_user(user: User) -> User:
