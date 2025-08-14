@@ -14,12 +14,12 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
-app-add_middleware(
+app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allows all origins, adjust as needed
+    allow_origins=["*"],  # Allow all origins for development; restrict in production
     allow_credentials=True,
-    allow_methods=["*"],  # Allows all methods, adjust as needed
-    allow_headers=["*"],  # Allows all headers, adjust as needed
+    allow_methods=["*"],  # Allow all methods
+    allow_headers=["*"],  # Allow all headers
 )
 
 logging.basicConfig(level=logging.INFO)
