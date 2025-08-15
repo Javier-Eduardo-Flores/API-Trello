@@ -11,7 +11,7 @@ from controllers.workspaces import (
 
 router = APIRouter(prefix="/workspaces")
 
-@router.post("/", tags=["Workspaces"])
+@router.post("", tags=["Workspaces"])
 @validateuser
 async def create_workspace_route(workspace: Workspace, request: Request) -> dict:
     user_id = request.state.id
@@ -22,7 +22,7 @@ async def create_workspace_route(workspace: Workspace, request: Request) -> dict
 
     return result
 
-@router.get("/", tags=["Workspaces"])
+@router.get("", tags=["Workspaces"])
 @validateuser
 async def get_workspaces_route(
     request: Request,
@@ -36,7 +36,7 @@ async def get_workspaces_route(
     return result
  
 
-@router.get("/{workspace_id}", tags=["Workspaces"])
+@router.get("{workspace_id}", tags=["Workspaces"])
 @validateuser
 async def get_workspace_by_id_route(
     workspace_id: str = Path(..., description="ID of the workspace to retrieve"),
@@ -50,7 +50,7 @@ async def get_workspace_by_id_route(
 
 
 
-@router.put("/{workspace_id}", tags=["Workspaces"])
+@router.put("{workspace_id}", tags=["Workspaces"])
 @validateuser
 async def update_workspace_route(
     workspace_id: str,
@@ -65,7 +65,7 @@ async def update_workspace_route(
     return result
 
 
-@router.delete("/{workspace_id}", tags=["Workspaces"])
+@router.delete("{workspace_id}", tags=["Workspaces"])
 @validateuser
 async def delete_workspace_route(
     workspace_id: str = Path(..., description="ID of the workspace to delete"),
