@@ -22,20 +22,6 @@ async def create_workspace_route(workspace: Workspace, request: Request) -> dict
 
     return result
 
-@router.get("/{workspace_id}", tags=["Workspaces"])
-@validateuser
-async def get_workspace_by_id_route(
-    workspace_id: str ,
-    request: Request = None
-):
-    user_id = request.state.id
-    result = await get_workspace_by_id(workspace_id, user_id)
-
-    if not result["success"]:
-        raise HTTPException(status_code=400, detail=result["message"])
-
-    return result
-
 @router.get("/", tags=["Workspaces"])
 @validateuser
 async def get_workspaces_route(
@@ -47,11 +33,8 @@ async def get_workspaces_route(
 
     result = await get_workspaces(skip=skip, limit=limit, user_id=user_id)
 
-    if not result["success"]:
-        raise HTTPException(status_code=400, detail=result["message"])
-
     return result
-
+ 
 
 @router.get("/{workspace_id}", tags=["Workspaces"])
 @validateuser
@@ -62,9 +45,6 @@ async def get_workspace_by_id_route(
     user_id = request.state.id
 
     result = await get_workspace_by_id(workspace_id, user_id)
-
-    if not result["success"]:
-        raise HTTPException(status_code=400, detail=result["message"])
 
     return result
 
@@ -82,9 +62,6 @@ async def update_workspace_route(
 
     result = await update_workspace(workspace_id, user_id, body)
 
-    if not result["success"]:
-        raise HTTPException(status_code=400, detail=result["message"])
-
     return result
 
 
@@ -97,8 +74,5 @@ async def delete_workspace_route(
     user_id = request.state.id
 
     result = await delete_workspace(workspace_id, user_id)
-
-    if not result["success"]:
-        raise HTTPException(status_code=400, detail=result["message"])
 
     return result
