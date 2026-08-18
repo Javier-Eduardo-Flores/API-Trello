@@ -132,7 +132,6 @@ async def get_workspace_by_id(workspace_id: str, user_id: str, workspaces_collec
 
 async def update_workspace(workspace_id: str, user_id: str, workspace: Workspace, workspaces_collection: Collection = None) -> dict:
     try:
-        workspace = Workspace(**workspace) 
         workspace_data =  workspaces_collection.find_one({"_id": ObjectId(workspace_id)})
         if not workspace_data:
             return {"success": False, "message": "Workspace not found", "data": None}
