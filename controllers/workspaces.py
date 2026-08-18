@@ -1,15 +1,11 @@
 from models.workspaces import Workspace
-from utils.mongodb import get_collection
 from bson import ObjectId
 from fastapi import HTTPException
 from pipelines.workspace_pipelines import get_lists_in_workspace_pipeline
-
-workspaces_collection = get_collection("workspaces")
-users_collection = get_collection("users")
+from pymongo.collection import Collection
 
 
-#------------------------------------------------------------------------------------
-async def create_workspace(workspace: Workspace, user_id: str) -> dict:
+async def create_workspace(workspace: Workspace, user_id: str, workspaces_collection: Collection, users_collection: Collection) -> dict:
     
     """
     Create a new workspace and associate it with the user.
@@ -51,7 +47,7 @@ async def create_workspace(workspace: Workspace, user_id: str) -> dict:
 
 #------------------------------------------------------------------------------------
 
-async def get_workspaces(skip: int = 0, limit: int = 50, user_id: str = None) -> dict:
+async def get_workspaces(skip: int = 0, limit: int = 50, user_id: str = None, workspaces_collection: Collection = None, users_collection: Collection = None) -> dict:
     
     try:
         if user_id:
@@ -114,7 +110,7 @@ async def get_workspaces(skip: int = 0, limit: int = 50, user_id: str = None) ->
 
 #------------------------------------------------------------------------------------
 
-async def get_workspace_by_id(workspace_id: str, user_id: str ) -> dict:
+async def get_workspace_by_id(workspace_id: str, user_id: str, workspaces_collection: Collection = None) -> dict:
     try: 
         workspace =  workspaces_collection.find_one({"_id": ObjectId(workspace_id)})
         if not workspace:
@@ -134,7 +130,7 @@ async def get_workspace_by_id(workspace_id: str, user_id: str ) -> dict:
 
 #------------------------------------------------------------------------------------
 
-async def update_workspace(workspace_id: str, user_id: str, workspace: Workspace) -> dict:
+async def update_workspace(workspace_id: str, user_id: str, workspace: Workspace, workspaces_collection: Collection = None) -> dict:
     try:
         workspace = Workspace(**workspace) 
         workspace_data =  workspaces_collection.find_one({"_id": ObjectId(workspace_id)})
@@ -193,7 +189,7 @@ async def update_workspace(workspace_id: str, user_id: str, workspace: Workspace
 #------------------------------------------------------------------------------------
 # pendiente por revisar si se puede eliminar el workspace si tiene listas asociadas
 
-async def delete_workspace(workspace_id: str, user_id: str) -> dict:
+async def delete_workspace(workspace_id: str, user_id: str, workspaces_collection: Collection = None) -> dict:
      try:
 
         workspace =  workspaces_collection.find_one({"_id": ObjectId(workspace_id)})

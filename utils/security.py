@@ -131,7 +131,7 @@ def validateadmin(func):
                 raise HTTPException( status_code=401 , detail="Inactive user or not admin" )
 
             request.state.email = email
-            request.state.firstname = firstname
+            request.state.name = name
             request.state.admin = admin
             request.state.id = id
 
@@ -173,7 +173,7 @@ def validate_token(credentials: HTTPAuthorizationCredentials = Depends(security)
         return {
             "id": user_id,
             "email": email,
-            "name": tname,
+            "name": name,
             "active": active,
             "role": "admin" if admin else "user"
         }

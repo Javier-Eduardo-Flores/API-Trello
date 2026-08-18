@@ -1,7 +1,7 @@
 import uvicorn 
 import logging
 
-from fastapi import FastAPI ,requests
+from fastapi import FastAPI
 from controllers.users import create_user ,login
 
 from models.users import User
@@ -51,8 +51,8 @@ def health_check():
 @app.get("/ready")
 def readiness_check():
     try:
-        from utils.mongodb import get_collection
-        db_status = test_connection()
+        from utils.mongodb import t_connection
+        db_status = t_connection()
 
         return {"status": "ready" if db_status else "not ready",
                 "database":"connected" if db_status else "not connected",

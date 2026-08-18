@@ -2,6 +2,7 @@ import os
 from dotenv import load_dotenv
 from pymongo import MongoClient
 from pymongo.server_api import ServerApi
+from pymongo.collection import Collection
 
 load_dotenv()
 
@@ -28,10 +29,9 @@ def get_mongo_client():
         )
     return _client
 
-def get_collection(col):
-    """Obtiene una colección de MongoDB"""
+def get_database():
     client = get_mongo_client()
-    return client[DB][col]
+    return client[DB]
 
 def t_connection():
     try:
@@ -41,3 +41,16 @@ def t_connection():
     except Exception as e:
         print(f"Error connecting to MongoDB: {e}")
         return False
+
+
+def get_users_collection() -> Collection:
+    return get_database()["users"]
+
+def get_workspaces_collection() -> Collection:
+    return get_database()["workspaces"]
+
+def get_lists_collection() -> Collection:
+    return get_database()["lists"]
+
+def get_tasks_collection() -> Collection:
+    return get_database()["tasks"]

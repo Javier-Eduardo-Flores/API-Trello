@@ -11,7 +11,7 @@ from models.users import User
 from models.login import Login
 
 from utils.security import create_jwt_token
-from utils.mongodb import get_collection
+from utils.mongodb import get_users_collection
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -61,7 +61,7 @@ async def create_user(user: User) -> User:
           raise HTTPException(status_code=400, detail=f"Error creating user in Firebase: {e}")
 
       try:
-         col = get_collection("users")
+         col = get_users_collection()
 
          new_user = User(
             name=user.name,
@@ -101,7 +101,7 @@ async def login(user: Login) -> dict:
             detail=response_data.get("error", {}).get("message", "Login failed")
         )
 
-   coll = get_collection("users")
+   coll = get_users_collection()
    user_data = coll.find_one({"email": user.email})
 
    if not user_data:
