@@ -2,3 +2,6 @@ secrets/
 .env
 .python-version
 __pycache__/
+.venv/
+*.pyc
+venv

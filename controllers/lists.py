@@ -1,17 +1,14 @@
 from models.lists import List
-from utils.mongodb import get_collection
 from bson import ObjectId
 from fastapi import HTTPException
-from pipelines.list_pipline import get_lists_by_workspace_pipeline ,count_tasks_in_list_pipeline, get_list_by_name_in_workspace_pipeline
+from pipelines.list_pipline import get_lists_by_workspace_pipeline, count_tasks_in_list_pipeline, get_list_by_name_in_workspace_pipeline
+from pymongo.collection import Collection
 
-lists_collection = get_collection("lists")
-workspaces_collection = get_collection("workspaces")
-tasks_collection = get_collection("tasks")
 
-async def create_list(list_data: List, workspace_id: str, user_id: str) -> dict:
+async def create_list(list_data: List, workspace_id: str, user_id: str, lists_collection: Collection, workspaces_collection: Collection) -> dict:
 
     try:
-        workspace =  workspaces_collection.find_one({"_id": ObjectId(workspace_id)})
+        workspace = workspaces_collection.find_one({"_id": ObjectId(workspace_id)})
         if not workspace:
             return {"success": False, "message": "Workspace not found", "data": None}
 
@@ -32,7 +29,7 @@ async def create_list(list_data: List, workspace_id: str, user_id: str) -> dict:
         list_dic = list_data.model_dump(exclude={"id"})
         list_dic["id_workspace"] = workspace_id
 
-        result =  lists_collection.insert_one(list_dic)
+        result = lists_collection.insert_one(list_dic)
         inserted_id = result.inserted_id
 
         response_data = {
@@ -47,17 +44,14 @@ async def create_list(list_data: List, workspace_id: str, user_id: str) -> dict:
         return {"success": False, "message": str(e), "data": None}
 
 
-#------------------------------------------------------------------------------------
-
-async def get_lists(workspace_id: str) -> list:
+async def get_lists(workspace_id: str, lists_collection: Collection, workspaces_collection: Collection) -> list:
     try:
-       
-        workspace =  workspaces_collection.find_one({"_id": ObjectId(workspace_id)})
+        workspace = workspaces_collection.find_one({"_id": ObjectId(workspace_id)})
         if not workspace:
             return {"success": False, "message": "Workspace not found", "data": None}
 
         pipeline = get_lists_by_workspace_pipeline(workspace_id)
-        lists_with_tasks =  lists_collection.aggregate(pipeline)
+        lists_with_tasks = lists_collection.aggregate(pipeline)
         lists_with_tasks = list(lists_with_tasks)
 
         return {"success": True, "message": "Lists retrieved successfully", "data": lists_with_tasks}
@@ -65,10 +59,9 @@ async def get_lists(workspace_id: str) -> list:
     except Exception as e:
         return {"success": False, "message": str(e), "data": None}
 
-#------------------------------------------------------------------------------------
 
-async def get_list_by_id (list_id:str, workspace_id:str)-> dict:
-   try:
+async def get_list_by_id(list_id: str, workspace_id: str, lists_collection: Collection, workspaces_collection: Collection) -> dict:
+    try:
         workspace = workspaces_collection.find_one({"_id": ObjectId(workspace_id)})
         if not workspace:
             return {"success": False, "message": "Workspace not found", "data": None}
@@ -78,32 +71,29 @@ async def get_list_by_id (list_id:str, workspace_id:str)-> dict:
 
         response_data = {
             "id": str(list_data["_id"]),
-            "title": list["title"],
-            "description": list["description"],
-            "id_workspace": list["id_workspace"]
+            "title": list_data["title"],
+            "description": list_data["description"],
+            "id_workspace": list_data["id_workspace"]
         }
         return {"success": True, "message": "List retrieved successfully", "data": response_data}
 
-   except Exception as e:
+    except Exception as e:
         return {"success": False, "message": str(e), "data": None}
 
-#------------------------------------------------------------------------------------
- 
-async def update_list(list_id: str, user_id: str, list_data: List) -> dict:
+
+async def update_list(list_id: str, user_id: str, list_data: List, lists_collection: Collection, workspaces_collection: Collection) -> dict:
     try:
-       
-        existing_list =  lists_collection.find_one({"_id": ObjectId(list_id)})
+        existing_list = lists_collection.find_one({"_id": ObjectId(list_id)})
         if not existing_list:
             return {"success": False, "message": "List not found", "data": None}
 
         workspace_id = existing_list["id_workspace"]
-        workspace =  workspaces_collection.find_one({"_id": ObjectId(workspace_id)})
+        workspace = workspaces_collection.find_one({"_id": ObjectId(workspace_id)})
         if not workspace:
             return {"success": False, "message": "Workspace not found", "data": None}
 
         if workspace["id_user"] != user_id:
             return {"success": False, "message": "Unauthorized", "data": None}
-
 
         if not list_data.title:
             list_data.title = existing_list["title"]
@@ -122,11 +112,9 @@ async def update_list(list_id: str, user_id: str, list_data: List) -> dict:
         )
 
         if list_data.description == existing_list["description"]:
-
             if list(list_duplicate):
                 raise HTTPException(status_code=400, detail="List with this title already exists in the workspace.")
 
-        
         result = lists_collection.update_one(
             {"_id": ObjectId(list_id)},
             {"$set": list_data.model_dump(exclude={"id"})}
@@ -135,7 +123,6 @@ async def update_list(list_id: str, user_id: str, list_data: List) -> dict:
         if result.modified_count == 0:
             return {"success": False, "message": "List not found or no changes made", "data": None}
 
-        
         response_data = {
             "id": list_id,
             "title": list_data.title,
@@ -152,16 +139,15 @@ async def update_list(list_id: str, user_id: str, list_data: List) -> dict:
     except Exception as e:
         return {"success": False, "message": str(e), "data": None}
 
-#------------------------------------------------------------------------------------
 
-async def delete_list(list_id: str, user_id: str) -> dict:
+async def delete_list(list_id: str, user_id: str, lists_collection: Collection, workspaces_collection: Collection, tasks_collection: Collection) -> dict:
     try:
-        list_data =  lists_collection.find_one({"_id": ObjectId(list_id)})
+        list_data = lists_collection.find_one({"_id": ObjectId(list_id)})
         if not list_data:
             return {"success": False, "message": "List not found", "data": None}
 
         workspace_id = list_data.get("id_workspace")
-        workspace =  workspaces_collection.find_one({"_id": ObjectId(workspace_id)})
+        workspace = workspaces_collection.find_one({"_id": ObjectId(workspace_id)})
         if not workspace:
             return {"success": False, "message": "Workspace not found", "data": None}
 
@@ -170,9 +156,8 @@ async def delete_list(list_id: str, user_id: str) -> dict:
             return {"success": False, "message": "Unauthorized", "data": None}
 
         pipeline = count_tasks_in_list_pipeline(list_id)
-        result =  tasks_collection.aggregate(pipeline)
+        result = tasks_collection.aggregate(pipeline)
         result = list(result)
-# Si hay algun error borrar el .to_list
 
         if result:
             task_count = result[0]["task_count"]

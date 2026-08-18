@@ -1,5 +1,6 @@
-from fastapi import APIRouter, Query, HTTPException, Request, Path, Body
+from fastapi import APIRouter, Query, HTTPException, Request, Path, Body, Depends
 from utils.security import validateuser, validateadmin
+from utils.mongodb import get_workspaces_collection, get_users_collection
 from models.workspaces import Workspace
 from controllers.workspaces import (
     create_workspace,
@@ -8,59 +9,67 @@ from controllers.workspaces import (
     update_workspace,
     delete_workspace
 )
+from pymongo.collection import Collection
 
 router = APIRouter(prefix="/workspaces")
 
+
 @router.post("", tags=["Workspaces"])
 @validateuser
-async def create_workspace_route(workspace: Workspace, request: Request) -> dict:
+async def create_workspace_route(workspace: Workspace, request: Request,
+    workspaces_collection: Collection = Depends(get_workspaces_collection),
+    users_collection: Collection = Depends(get_users_collection)) -> dict:
     user_id = request.state.id
-    result = await create_workspace(workspace, user_id)
+    result = await create_workspace(workspace, user_id, workspaces_collection, users_collection)
 
     if not result["success"]:
         raise HTTPException(status_code=400, detail=result["message"])
 
     return result
 
+
 @router.get("", tags=["Workspaces"])
 @validateuser
 async def get_workspaces_route(
     request: Request,
     skip: int = Query(default=0, ge=0, description="Número de registros a omitir"),
-    limit: int = Query(default=50, ge=1, le=100, description="Número de registros a obtener")
+    limit: int = Query(default=50, ge=1, le=100, description="Número de registros a obtener"),
+    workspaces_collection: Collection = Depends(get_workspaces_collection),
+    users_collection: Collection = Depends(get_users_collection)
 ):
     user_id = request.state.id
 
-    result = await get_workspaces(skip=skip, limit=limit, user_id=user_id)
+    result = await get_workspaces(skip=skip, limit=limit, user_id=user_id, workspaces_collection=workspaces_collection, users_collection=users_collection)
 
     return result
- 
+
 
 @router.get("{workspace_id}", tags=["Workspaces"])
 @validateuser
 async def get_workspace_by_id_route(
     workspace_id: str = Path(..., description="ID of the workspace to retrieve"),
-    request: Request = None
+    request: Request = None,
+    workspaces_collection: Collection = Depends(get_workspaces_collection)
 ):
     user_id = request.state.id
 
-    result = await get_workspace_by_id(workspace_id, user_id)
+    result = await get_workspace_by_id(workspace_id, user_id, workspaces_collection)
 
     return result
-
 
 
 @router.put("{workspace_id}", tags=["Workspaces"])
 @validateuser
 async def update_workspace_route(
     workspace_id: str,
-    body: dict = Body(...),
-    request: Request = None
+    body: Workspace,
+    request: Request,
+    workspaces_collection: Collection = Depends(get_workspaces_collection)
 ) -> dict:
 
     user_id = request.state.id
 
-    result = await update_workspace(workspace_id, user_id, body)
+    result = await update_workspace(workspace_id, user_id, body, workspaces_collection)
 
     return result
 
@@ -69,10 +78,11 @@ async def update_workspace_route(
 @validateuser
 async def delete_workspace_route(
     workspace_id: str = Path(..., description="ID of the workspace to delete"),
-    request: Request = None
+    request: Request = None,
+    workspaces_collection: Collection = Depends(get_workspaces_collection)
 ):
     user_id = request.state.id
 
-    result = await delete_workspace(workspace_id, user_id)
+    result = await delete_workspace(workspace_id, user_id, workspaces_collection)
 
     return result
