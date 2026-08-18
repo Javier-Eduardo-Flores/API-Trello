@@ -3,7 +3,7 @@ from typing import Optional
 import re
 
 class stateWorkspace(BaseModel):
-    id: Optional[int] = Field(default=None, description="State Workspace ID")
+    id: Optional[str] = Field(default=None, description="State Workspace ID")
 
     description: str = Field(
         description="State description",

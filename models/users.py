@@ -3,7 +3,7 @@ from typing import Optional
 import re
 
 class User(BaseModel):
-    id: Optional[int] = Field(default=None, description="User ID")
+    id: Optional[str] = Field(default=None, description="User ID")
 
     name: str = Field(
         description="User name",

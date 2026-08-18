@@ -4,7 +4,7 @@ from datetime import datetime
 import re
 
 class taskAssignment(BaseModel):
-    id: Optional[int] = Field(default=None, description="Task Assignment ID")
+    id: Optional[str] = Field(default=None, description="Task Assignment ID")
 
     id_task: str = Field(
         description="ID of the task being assigned",

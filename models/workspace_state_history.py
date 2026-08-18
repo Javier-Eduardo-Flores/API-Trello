@@ -4,7 +4,7 @@ from datetime import datetime
 import re
 
 class workspaceStateHistory(BaseModel):
-    id: Optional[int] = Field(default=None, description="State Workspace Record ID")
+    id: Optional[str] = Field(default=None, description="State Workspace Record ID")
 
     id_workspace: str = Field(
     description="ID of the workspace associated with the state record",
